@@ -1,7 +1,7 @@
 package clientinterface;
+
 import kioskapp.order.Order;
 import kioskapp.itemproduct.*;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,49 +9,31 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.*;    
 import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
-
 import java.sql.*;
-
 import java.text.DecimalFormat;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class UserInterface {
-   private JFrame mainFrame;
-   
-   private JPanel orderModePanel, controlPanel, quantityPanel, creditCardPanel, listPanel;
-   
-   private JLabel headerLabel, orderModeLabel, itemQuantityLabel, creditCardLabel, quantityTotalLabel, quantityLabel, priceTotalLabel, priceLabel;
-   
-   private JComboBox quantitySelection;
-   
-   private JTextField creditCardField;
-   
-   private JOptionPane itemMessage;
-   
+   private JFrame mainFrame;   
+   private JPanel orderModePanel, controlPanel, quantityPanel, creditCardPanel, listPanel;   
+   private JLabel headerLabel, orderModeLabel, itemQuantityLabel, creditCardLabel, quantityTotalLabel, quantityLabel, priceTotalLabel, priceLabel;   
+   private JComboBox quantitySelection;   
+   private JTextField creditCardField;   
+   private JOptionPane itemMessage;   
    private JButton addButton, payButton;
-   private JButton be;
-   
    private JRadioButton eatInButton, takeAwayButton;
-   private ButtonGroup group;
-   
+   private ButtonGroup group;   
    private JTable table;   
    private JScrollPane scrollPane;   
-   private DefaultTableModel tableModel;
-   
-   public String Data, Price;
-   
-   private DefaultListModel<String> list1;
-   
-   
-   private JList<String> list;
-   
-   public int x, y = 0;
-   
+   private DefaultTableModel tableModel;   
+   public String Data, Price;   
+   private DefaultListModel<String> list1;    
+   private JList<String> list;   
+   public int x, y = 0;   
    public float z, a = 0;
    
    Order myOrder = new Order();
@@ -87,7 +69,7 @@ public class UserInterface {
    }
    
    @SuppressWarnings("unchecked")
-private void prepareGUI(){
+   private void prepareGUI(){
 	   
 	  //Frame 
       mainFrame = new JFrame("TCP Kiosk Application");
@@ -157,20 +139,11 @@ private void prepareGUI(){
 			//System.out.println("Total Price" + String.valueOf(a));
 			
 			try {
-				//int rand_int1 = ThreadLocalRandom.current().nextInt();
 				Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password);
-				System.out.print("EGEGEGE");				//statement = connection.createStatement();
-				//String insertOrder = "INSERT INTO order " + "VALUES (10, 1)";
-				//String insertOrder = "INSERT INTO order " + "VALUES (1, 1, 1)";
-				//statement.executeUpdate(insertOrder);
-				//connection.close();
-				
-				
-								
+	
 			    String query = "INSERT INTO Orders(TotalAmount, OrderReferenceNumber) VALUES (?,?)";
 			    
 			    PreparedStatement preparedStmt = connection.prepareStatement(query);
-			    //preparedStmt.setInt(1, 1);
 			    preparedStmt.setFloat(1, a);
 			    preparedStmt.setInt(2, 20);
 			    preparedStmt.executeUpdate();
@@ -180,7 +153,6 @@ private void prepareGUI(){
 			    System.out.println("Inserted records into the table...");
 				
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -188,7 +160,6 @@ private void prepareGUI(){
     	  
       });
       payButton = new JButton("Pay");
-      be = new JButton("East");
       
       //ScrollPane
       scrollPane = new JScrollPane(table);
@@ -217,10 +188,6 @@ private void prepareGUI(){
       quantityPanel = new JPanel();
       quantityPanel.setPreferredSize(new Dimension(100,100));
       quantityPanel.setLayout(new FlowLayout());
-//      quantityPanel.add(headerLabel);
-//      quantityPanel.add(itemQuantityLabel);
-//      quantityPanel.add(quantitySelection);
-//      quantityPanel.add(addButton);   
       
       //South Panel
       creditCardPanel = new JPanel();
@@ -239,14 +206,12 @@ private void prepareGUI(){
       listPanel.add(quantityLabel);
       listPanel.add(priceTotalLabel);
       listPanel.add(priceLabel);
-      
-      
+            
       mainFrame.add(orderModePanel, BorderLayout.NORTH);
       mainFrame.add(controlPanel, BorderLayout.CENTER);
       mainFrame.add(creditCardPanel, BorderLayout.SOUTH);
       mainFrame.add(listPanel, BorderLayout.EAST);      
-      mainFrame.add(quantityPanel, BorderLayout.WEST);  
-      
+      mainFrame.add(quantityPanel, BorderLayout.WEST);        
    }
       
    private void showTableDemo() throws ClassNotFoundException{
