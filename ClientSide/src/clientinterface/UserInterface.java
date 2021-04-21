@@ -159,7 +159,7 @@ private void prepareGUI(){
 			try {
 				//int rand_int1 = ThreadLocalRandom.current().nextInt();
 				Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password);
-				//statement = connection.createStatement();
+				System.out.print("EGEGEGE");				//statement = connection.createStatement();
 				//String insertOrder = "INSERT INTO order " + "VALUES (10, 1)";
 				//String insertOrder = "INSERT INTO order " + "VALUES (1, 1, 1)";
 				//statement.executeUpdate(insertOrder);
