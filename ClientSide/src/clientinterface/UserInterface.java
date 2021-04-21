@@ -2,6 +2,7 @@ package clientinterface;
 
 import kioskapp.order.Order;
 import kioskapp.itemproduct.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -71,7 +72,6 @@ public class UserInterface {
    @SuppressWarnings("unchecked")
 
 private void prepareGUI(){
-	   //Akmal Khairi Changes
 	  //Frame 
       mainFrame = new JFrame("TCP Kiosk Application");
       mainFrame.setSize(600,600);
