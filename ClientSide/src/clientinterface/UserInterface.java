@@ -165,12 +165,14 @@ private void prepareGUI(){
 				//statement.executeUpdate(insertOrder);
 				//connection.close();
 				
+				
 								
-			    String query = "INSERT INTO order (TotalAmount) VALUES (?)";
+			    String query = "INSERT INTO Orders(TotalAmount, OrderReferenceNumber) VALUES (?,?)";
 			    
 			    PreparedStatement preparedStmt = connection.prepareStatement(query);
-			    preparedStmt.setFloat(1, myOrder.getTotalAmount());
-
+			    //preparedStmt.setInt(1, 1);
+			    preparedStmt.setFloat(1, a);
+			    preparedStmt.setInt(2, 20);
 			    preparedStmt.executeUpdate();
 			    preparedStmt.close();
 			      
