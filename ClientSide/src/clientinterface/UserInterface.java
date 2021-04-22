@@ -71,7 +71,6 @@ public class UserInterface {
    @SuppressWarnings("unchecked")
 
 private void prepareGUI(){
-	   //Akmal Khairi Changes
 	  //Frame 
       mainFrame = new JFrame("TCP Kiosk Application");
       mainFrame.setSize(600,600);
