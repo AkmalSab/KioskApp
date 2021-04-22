@@ -105,6 +105,12 @@ public class ServerApplication {
 			    preparedStmt.setInt(5, Integer.valueOf(receivedData2));
 			    preparedStmt.setString(6, receivedData6);
 			    preparedStmt.executeUpdate();
+			    
+			    String queryUpdate = "UPDATE orders SET status=? WHERE OrderId=?";
+	    		PreparedStatement preparedStmt5 = connection.prepareStatement(queryUpdate);
+	    		preparedStmt5.setString(1, "Done");
+	    		preparedStmt5.setInt(2, Integer.valueOf(receivedData4));
+	    		preparedStmt5.executeUpdate();
 		    	
 		    	// Process data - convert to upper case
 			    String sendingData = "verified";
