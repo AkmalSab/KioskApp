@@ -1,40 +1,54 @@
 package clientinterface;
-
 import kioskapp.order.Order;
 import kioskapp.itemproduct.*;
+import kioskapp.ordertransaction.*;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.*;    
 import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
+
 import java.sql.*;
+
 import java.text.DecimalFormat;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 
 public class UserInterface {
-   private JFrame mainFrame;   
-   private JPanel orderModePanel, controlPanel, quantityPanel, creditCardPanel, listPanel;   
-   private JLabel headerLabel, orderModeLabel, itemQuantityLabel, creditCardLabel, quantityTotalLabel, quantityLabel, priceTotalLabel, priceLabel;   
-   private JComboBox quantitySelection;   
-   private JTextField creditCardField;   
-   private JOptionPane itemMessage;   
+   private JFrame mainFrame;
+   private JPanel orderModePanel, controlPanel, quantityPanel, creditCardPanel, listPanel;
+
+   private JLabel headerLabel, orderModeLabel, itemQuantityLabel, creditCardLabel, quantityTotalLabel, quantityLabel, priceTotalLabel, priceLabel, IdLabel, productIdLabel;
+   
+   private JComboBox quantitySelection;
+   
+   private JTextField creditCardField;
+   
+   
    private JButton addButton, payButton;
+   
    private JRadioButton eatInButton, takeAwayButton;
-   private ButtonGroup group;   
+   private ButtonGroup group;
+   
    private JTable table;   
    private JScrollPane scrollPane;   
-   private DefaultTableModel tableModel;   
-   public String Data, Price;   
-   private DefaultListModel<String> list1;    
-   private JList<String> list;   
-   public int x, y = 0;   
+   private DefaultTableModel tableModel;
+   
+   public String Data, Price, ID;
+   
+   private DefaultListModel<String> list1;
+   
+   
+   private JList<String> list;
+   
+   public int x, y, orderId = 0;
+   
    public float z, a = 0;
    
    Order myOrder = new Order();
@@ -70,7 +84,6 @@ public class UserInterface {
    }
    
    @SuppressWarnings("unchecked")
-
 private void prepareGUI(){
 	  //Frame 
       mainFrame = new JFrame("TCP Kiosk Application");
@@ -87,13 +100,12 @@ private void prepareGUI(){
       quantityTotalLabel = new JLabel("Total Quantity: "); 
       quantityLabel = new JLabel(); 
       priceTotalLabel = new JLabel("Total Price: RM"); 
-      priceLabel = new JLabel(); 
-      
-      //OptionPane
-      itemMessage = new JOptionPane();
+      priceLabel = new JLabel();
+      productIdLabel = new JLabel("Product ID: "); 
+      IdLabel = new JLabel();
       
       //TextField
-      creditCardField = new JTextField(4);
+      creditCardField = new JTextField(20);
       
       //RadioButton
       eatInButton = new JRadioButton("Eat-In", true);
@@ -130,6 +142,7 @@ private void prepareGUI(){
 			y = y + x;
 			z = Float.valueOf(Price);
 			a = a + (x * z);
+			float totalOneItem = x * z;
 			myOrder.setTotalAmount(a);
 			float tot = myOrder.getTotalAmount();
 			list1.addElement(Data + " \t" + String.valueOf(x) + " \t" + String.valueOf(df.format(x * z)));
@@ -137,23 +150,89 @@ private void prepareGUI(){
 			quantityLabel.setText(String.valueOf(y));
 			//priceLabel.setText(String.valueOf(df.format(a)));
 			priceLabel.setText(String.valueOf(df.format(tot)));
+			IdLabel.setText(ID);
+			itemprod.setItemProduct(Integer.valueOf(ID));
 			//System.out.println("Total Price" + String.valueOf(a));
 			
 			try {
+				Random r = new Random();
+				int random_ref_num = r.nextInt(100);
 				Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password);
-	
-			    String query = "INSERT INTO Orders(TotalAmount, OrderReferenceNumber) VALUES (?,?)";
+				PreparedStatement preparedStmt;
+				//ResultSet rs;
 			    
-			    PreparedStatement preparedStmt = connection.prepareStatement(query);
-			    preparedStmt.setFloat(1, a);
-			    preparedStmt.setInt(2, 20);
-			    preparedStmt.executeUpdate();
-			    preparedStmt.close();
-			      
+			    String getValidation = "SELECT COUNT(*) FROM orders WHERE status = 'To Pay' LIMIT 1";
+			    PreparedStatement preparedStmts = connection.prepareStatement(getValidation);
+			    ResultSet result = preparedStmts.executeQuery(getValidation);
+			    orderId = 0;
+			    
+			    if (result.next()) {
+			    	orderId = result.getInt(1);
+			    	if (orderId == 1)
+			    	{
+			    		String getValidations = "SELECT OrderId FROM orders WHERE status = 'To Pay' LIMIT 1";
+					    PreparedStatement preparedStmtss = connection.prepareStatement(getValidations);
+					    ResultSet results = preparedStmtss.executeQuery(getValidations);
+					    
+					    if (results.next()) {
+					    	orderId = results.getInt(1);
+					    	
+					    	String query2 = "INSERT INTO ordereditem (ItemProduct, Quantity, SubTotalAmount, Orders) VALUES (?,?,?,?)";
+				    		PreparedStatement preparedStmt4 = connection.prepareStatement(query2);  
+				    		preparedStmt4.setInt(1, itemprod.getItemProduct());
+				    		preparedStmt4.setInt(2, x);
+				    		preparedStmt4.setFloat(3, totalOneItem);
+				    		preparedStmt4.setInt(4, orderId);
+				    		preparedStmt4.executeUpdate();
+				    		
+				    		String queryUpdate = "UPDATE orders SET TotalAmount=? WHERE OrderId=?";
+				    		PreparedStatement preparedStmt5 = connection.prepareStatement(queryUpdate);
+				    		preparedStmt5.setFloat(1, myOrder.getTotalAmount());
+				    		preparedStmt5.setInt(2, orderId);
+				    		preparedStmt5.executeUpdate();
+				    		
+//				    		System.out.println("Selected Radio Button: " + group.getSelection().getActionCommand());
+					    	
+					    }
+			    		
+			    	}
+			    	else
+			    	{
+			    		String query3 = "INSERT INTO orders (TotalAmount, OrderReferenceNumber, status) VALUES (?,?,?)";
+					    
+					    preparedStmt = connection.prepareStatement(query3, Statement.RETURN_GENERATED_KEYS);  
+					    preparedStmt.setFloat(1, myOrder.getTotalAmount());
+					    preparedStmt.setFloat(2, random_ref_num);
+					    preparedStmt.setString(3, "To Pay");
+					    preparedStmt.executeUpdate();
+					    
+					    String getValidations = "SELECT OrderId FROM orders WHERE status = 'To Pay' LIMIT 1";
+					    PreparedStatement preparedStmtss = connection.prepareStatement(getValidations);
+					    ResultSet results = preparedStmtss.executeQuery(getValidations);
+					    
+					    if (results.next()) {
+					    	orderId = results.getInt(1);
+					    	
+					    	String query2 = "INSERT INTO ordereditem (ItemProduct, Quantity, SubTotalAmount, Orders) VALUES (?,?,?,?)";
+				    		PreparedStatement preparedStmt4 = connection.prepareStatement(query2);  
+				    		preparedStmt4.setInt(1, itemprod.getItemProduct());
+				    		preparedStmt4.setInt(2, x);
+				    		preparedStmt4.setFloat(3, myOrder.getTotalAmount());
+				    		preparedStmt4.setInt(4, orderId);
+				    		preparedStmt4.executeUpdate();
+					    	
+					    	//System.out.println(a);
+					    }
+			    	}
+			    }
+			    
+			    //System.out.println("ni orderid ->" + myOrder.getOrderId()+ ". ni quantity -> " + x + ". ni total ->" + myOrder.getTotalAmount() + ". ni product id ->" + itemprod.getItemProduct());
+			    
+			    //preparedStmt.close();
 			    connection.close();
-			    System.out.println("Inserted records into the table...");
 				
 			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -161,6 +240,27 @@ private void prepareGUI(){
     	  
       });
       payButton = new JButton("Pay");
+      payButton.addActionListener(new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String cc = creditCardField.getText().toString();
+			//System.out.println(cc);
+			
+			OrderTransaction ot = new OrderTransaction();
+			ot.setLast4Digits(Integer.valueOf(cc));
+			
+			ClientApplication CA = new ClientApplication();
+			
+//			System.out.println("ot.getLast4Digits UserInterface = " + ot.getLast4Digits());
+//			System.out.println("Order id UserInterface = " + orderId);
+//			System.out.println("myOrder.getTotalAmount() UserInterface = " + myOrder.getTotalAmount());
+//			System.out.println("group.getSelection().getActionCommand() UserInterface = " + group.getSelection().getActionCommand());
+			CA.SendCreditCardNumber(ot.getLast4Digits(), orderId, myOrder.getTotalAmount(), group.getSelection().getActionCommand());
+			
+		}
+    	  
+      });
       
       //ScrollPane
       scrollPane = new JScrollPane(table);
@@ -188,7 +288,7 @@ private void prepareGUI(){
       //West Panel
       quantityPanel = new JPanel();
       quantityPanel.setPreferredSize(new Dimension(100,100));
-      quantityPanel.setLayout(new FlowLayout());
+      quantityPanel.setLayout(new FlowLayout());   
       
       //South Panel
       creditCardPanel = new JPanel();
@@ -196,7 +296,9 @@ private void prepareGUI(){
       creditCardPanel.setLayout(new FlowLayout());
       creditCardPanel.add(creditCardLabel);
       creditCardPanel.add(creditCardField);   
-      creditCardPanel.add(payButton);   
+      creditCardPanel.add(payButton);
+      creditCardPanel.add(productIdLabel);
+      creditCardPanel.add(IdLabel);
       
       //East Panel
       listPanel = new JPanel();
@@ -207,12 +309,13 @@ private void prepareGUI(){
       listPanel.add(quantityLabel);
       listPanel.add(priceTotalLabel);
       listPanel.add(priceLabel);
-            
+      
       mainFrame.add(orderModePanel, BorderLayout.NORTH);
       mainFrame.add(controlPanel, BorderLayout.CENTER);
       mainFrame.add(creditCardPanel, BorderLayout.SOUTH);
       mainFrame.add(listPanel, BorderLayout.EAST);      
-      mainFrame.add(quantityPanel, BorderLayout.WEST);        
+      mainFrame.add(quantityPanel, BorderLayout.WEST);  
+      
    }
       
    private void showTableDemo() throws ClassNotFoundException{
@@ -249,6 +352,7 @@ private void prepareGUI(){
               {
                 Data = null;
                 Price = null;
+                ID = null;
                 int[] row = table.getSelectedRows();
                 int[] columns = table.getSelectedColumns();
                 for (int i = 0; i < row.length; i++) 
@@ -257,9 +361,11 @@ private void prepareGUI(){
                   {                	
                     Data = String.valueOf(table.getValueAt(row[i], columns[j]));
                     Price = String.valueOf(table.getValueAt(row[i], 2));
+                    ID = String.valueOf(table.getValueAt(row[i], 0));
                   }                                  
                 }                
-                headerLabel.setText(Data);  
+                headerLabel.setText(Data);
+                //IdLabel.setText(ID);
                 
               }
             });
