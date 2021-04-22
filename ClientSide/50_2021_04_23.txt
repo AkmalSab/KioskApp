@@ -1,0 +1,8 @@
+Order Id: 50
+Item: 
+1. McChicken	
+2. Strawberry Sundae
+3. Chocolate Sundae
+4. McChicken	
+5. Filet-O-Fish Meal (Medium)
+Total: RM13.0

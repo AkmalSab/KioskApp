@@ -1,0 +1,22 @@
+Order Id: 64
+Item: 
+1. McChicken	
+2. Strawberry Sundae
+3. Chocolate Sundae
+4. McChicken	
+5. Filet-O-Fish Meal (Medium)
+6. McChicken	
+7. McChicken	
+8. Ayam Goreng McD Spicy (2pcs)	
+9. Ayam Goreng McD Spicy (2pcs)	
+10. McChicken	
+11. McChicken	
+12. Ayam Goreng McD Spicy (2pcs)	
+13. McChicken	
+14. McChicken	
+15. Ayam Goreng McD Spicy (5pcs)
+16. Ayam Goreng McD Spicy (2pcs)	
+17. McChicken	
+18. McChicken	
+19. Ayam Goreng McD Spicy (2pcs)	
+Total: RM11.9
