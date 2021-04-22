@@ -5,10 +5,31 @@ import kioskapp.ordertransaction.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+
+import javax.swing.JOptionPane;
 
 public class ClientApplication {
 	
+	static String driver;
+	static String dbName;
+	static String connectionURL;
+	static String username;
+	static String password;
+	
+	Connection connection;
+    Statement statement;
+	   
 	public void SendCreditCardNumber(int cardNumber, int orderID, float totalAmount, String orderMode) {
+		
+		driver = "com.mysql.cj.jdbc.Driver";
+		connectionURL ="jdbc:mysql://localhost:3306/";
+		dbName = "kioskappdb_dev";
+		username = "root";
+		password = "";
 		
 		OrderTransaction ot = new OrderTransaction();
 		
@@ -31,8 +52,7 @@ public class ClientApplication {
 			byte sendingDataBuffer5[] = new byte[bufferSize];
 			byte sendingDataBuffer6[] = new byte[bufferSize];
 			
-			// Convert data to bytes and store data in the buffer2
-			
+			// Convert data to bytes and store data in the buffer2			
 			// Last4Digits
 			String sentence2 = String.valueOf(cardNumber);
 			// Transaction Date
@@ -96,21 +116,39 @@ public class ClientApplication {
 		    String allCapsData = new String(receivingPacket.getData(), 0, receivingPacket.getLength());
 		    System.out.println("Received from server: " + allCapsData);
 		    String verified = "verified";
+		    
 		    if(verified.equals(allCapsData)){
-		    	//System.out.println("verify string sama dengan server");
 		    	KitchenInterface KI = new KitchenInterface();
 		    	KI.retrieve();
+		    	
+		    	TransactionDetail td = new TransactionDetail();
+		    	td.TransactionDetailUI();
+		    	td.retrieve();
 		    }
 		    else {
-		    	//System.out.println("verify string x sama dengan server");
+		    	
+		    	Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password);
+		    	String queryDelete = "DELETE FROM ordereditem";
+		    	String queryDelete2 = "DELETE FROM ordertransaction";
+		    	String queryDelete3 = "DELETE FROM orders";
+	    		PreparedStatement preparedStmt = connection.prepareStatement(queryDelete);
+	    		PreparedStatement preparedStmt2 = connection.prepareStatement(queryDelete2);
+	    		PreparedStatement preparedStmt3 = connection.prepareStatement(queryDelete3);
+	    		preparedStmt.executeUpdate();	
+	    		preparedStmt2.executeUpdate();	
+	    		preparedStmt3.executeUpdate();	
+	    		
+		    	UserInterface ui = new UserInterface();
+		    	UserInterface.mainFrame.dispose();
+		    	ui.prepareGUI();
+		    	ui.showTableDemo();
+		    	JOptionPane.showMessageDialog(null,"Credit Card Number does not valid");
 		    }
 
 			// Closing the socket connection with the server
-			clientSocket.close();
-			
+			clientSocket.close();			
 			
 		} catch (Exception ex) {
-
 			System.out.println("Durian Tunggal... we got problem");
 			ex.printStackTrace();
 		}

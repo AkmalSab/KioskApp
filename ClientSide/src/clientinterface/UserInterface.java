@@ -1,4 +1,5 @@
 package clientinterface;
+
 import kioskapp.order.Order;
 import kioskapp.itemproduct.*;
 import kioskapp.ordertransaction.*;
@@ -9,46 +10,30 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.*;    
 import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
-
 import java.sql.*;
-
 import java.text.DecimalFormat;
 import java.util.Random;
 
-
 public class UserInterface {
-   private JFrame mainFrame;
+	
+   public static JFrame mainFrame;
    private JPanel orderModePanel, controlPanel, quantityPanel, creditCardPanel, listPanel;
-
    private JLabel headerLabel, orderModeLabel, itemQuantityLabel, creditCardLabel, quantityTotalLabel, quantityLabel, priceTotalLabel, priceLabel, IdLabel, productIdLabel;
-   
    private JComboBox quantitySelection;
-   
    private JTextField creditCardField;
-   
-   
    private JButton addButton, payButton;
-   
    private JRadioButton eatInButton, takeAwayButton;
    private ButtonGroup group;
-   
    private JTable table;   
    private JScrollPane scrollPane;   
    private DefaultTableModel tableModel;
-   
    public String Data, Price, ID;
-   
    private DefaultListModel<String> list1;
-   
-   
    private JList<String> list;
-   
    public int x, y, orderId = 0;
-   
    public float z, a = 0;
    
    Order myOrder = new Order();
@@ -61,8 +46,8 @@ public class UserInterface {
 	static String password;
 	
    
-   Connection connection;//Creating object of Connection class
-   Statement statement;//Creating object of Statement class
+   Connection connection;
+   Statement statement;
 
    public UserInterface()
    {      
@@ -84,13 +69,13 @@ public class UserInterface {
    }
    
    @SuppressWarnings("unchecked")
-private void prepareGUI(){
+   public void prepareGUI(){
 	  //Frame 
       mainFrame = new JFrame("TCP Kiosk Application");
       mainFrame.setSize(600,600);
       mainFrame.setLayout(new BorderLayout());
       mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      mainFrame.setVisible(true);       
+      mainFrame.setVisible(true);    
       
       //Label
       orderModeLabel = new JLabel("Order Mode: ");
@@ -146,20 +131,18 @@ private void prepareGUI(){
 			myOrder.setTotalAmount(a);
 			float tot = myOrder.getTotalAmount();
 			list1.addElement(Data + " \t" + String.valueOf(x) + " \t" + String.valueOf(df.format(x * z)));
-			//System.out.println("Total Quantity" + String.valueOf(y));	
+			
 			quantityLabel.setText(String.valueOf(y));
-			//priceLabel.setText(String.valueOf(df.format(a)));
-			priceLabel.setText(String.valueOf(df.format(tot)));
-			IdLabel.setText(ID);
+			priceLabel.setText(String.valueOf(df.format(tot)));			
+			IdLabel.setText(ID);			
 			itemprod.setItemProduct(Integer.valueOf(ID));
-			//System.out.println("Total Price" + String.valueOf(a));
+
 			
 			try {
 				Random r = new Random();
 				int random_ref_num = r.nextInt(100);
 				Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password);
 				PreparedStatement preparedStmt;
-				//ResultSet rs;
 			    
 			    String getValidation = "SELECT COUNT(*) FROM orders WHERE status = 'To Pay' LIMIT 1";
 			    PreparedStatement preparedStmts = connection.prepareStatement(getValidation);
@@ -189,12 +172,8 @@ private void prepareGUI(){
 				    		PreparedStatement preparedStmt5 = connection.prepareStatement(queryUpdate);
 				    		preparedStmt5.setFloat(1, myOrder.getTotalAmount());
 				    		preparedStmt5.setInt(2, orderId);
-				    		preparedStmt5.executeUpdate();
-				    		
-//				    		System.out.println("Selected Radio Button: " + group.getSelection().getActionCommand());
-					    	
-					    }
-			    		
+				    		preparedStmt5.executeUpdate();				    						    	
+					    }			    		
 			    	}
 			    	else
 			    	{
@@ -220,42 +199,28 @@ private void prepareGUI(){
 				    		preparedStmt4.setFloat(3, myOrder.getTotalAmount());
 				    		preparedStmt4.setInt(4, orderId);
 				    		preparedStmt4.executeUpdate();
-					    	
-					    	//System.out.println(a);
 					    }
 			    	}
-			    }
-			    
-			    //System.out.println("ni orderid ->" + myOrder.getOrderId()+ ". ni quantity -> " + x + ". ni total ->" + myOrder.getTotalAmount() + ". ni product id ->" + itemprod.getItemProduct());
-			    
+			    }			   			    
 			    //preparedStmt.close();
-			    connection.close();
-				
+			    connection.close();				
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}
-			
-		}
-    	  
+			}			
+		}    	  
       });
+      
       payButton = new JButton("Pay");
       payButton.addActionListener(new ActionListener() {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String cc = creditCardField.getText().toString();
-			//System.out.println(cc);
 			
 			OrderTransaction ot = new OrderTransaction();
 			ot.setLast4Digits(Integer.valueOf(cc));
 			
 			ClientApplication CA = new ClientApplication();
-			
-//			System.out.println("ot.getLast4Digits UserInterface = " + ot.getLast4Digits());
-//			System.out.println("Order id UserInterface = " + orderId);
-//			System.out.println("myOrder.getTotalAmount() UserInterface = " + myOrder.getTotalAmount());
-//			System.out.println("group.getSelection().getActionCommand() UserInterface = " + group.getSelection().getActionCommand());
 			CA.SendCreditCardNumber(ot.getLast4Digits(), orderId, myOrder.getTotalAmount(), group.getSelection().getActionCommand());
 			
 		}
@@ -317,32 +282,28 @@ private void prepareGUI(){
       mainFrame.add(quantityPanel, BorderLayout.WEST);  
       
    }
-      
-   private void showTableDemo() throws ClassNotFoundException{
+   
+        
+   public void showTableDemo() throws ClassNotFoundException{
       
       try {
     	  Class.forName(driver);
   		  Connection connection = DriverManager.getConnection(connectionURL+dbName+"?serverTimezone=UTC",username,password); //Creating connection with database
-          statement = connection.createStatement();//creating statement object
-          String query = "select * from itemproduct";//Storing MySQL query in A string variable
-          ResultSet resultSet = statement.executeQuery(query);//executing query and storing result in ResultSet
+          statement = connection.createStatement();
+          String query = "select * from itemproduct";
+          ResultSet resultSet = statement.executeQuery(query);
                               
           while (resultSet.next()) 
           {          
-       	   	//Retrieving details from the database and storing it in the String variables
-        	  int id = resultSet.getInt("ItemProduct");
-              String name = resultSet.getString("Name");
-              float price = resultSet.getFloat("Price");
-              //String aaa = String.valueOf(id);       
-              itemprod.setItemProduct(id);
-              itemprod.setName(name);
-              itemprod.setPrice(price);
-              
-              Object[] populateData = {itemprod.getItemProduct(), itemprod.getName(), itemprod.getPrice()}; 
-              tableModel.addRow(populateData);
-                            
-              
-              //System.out.println(resultSet.getInt("ItemProduct") + ", " + resultSet.getString("Name") + ", " + resultSet.getString("Price"));
+	    	  int id = resultSet.getInt("ItemProduct");
+	          String name = resultSet.getString("Name");
+	          float price = resultSet.getFloat("Price");
+	          itemprod.setItemProduct(id);
+	          itemprod.setName(name);
+	          itemprod.setPrice(price);
+	          
+	          Object[] populateData = {itemprod.getItemProduct(), itemprod.getName(), itemprod.getPrice()}; 
+	          tableModel.addRow(populateData);
           }  
           
           ListSelectionModel select = table.getSelectionModel();
@@ -364,9 +325,7 @@ private void prepareGUI(){
                     ID = String.valueOf(table.getValueAt(row[i], 0));
                   }                                  
                 }                
-                headerLabel.setText(Data);
-                //IdLabel.setText(ID);
-                
+                headerLabel.setText(Data);                
               }
             });
       } catch (SQLException throwables) {

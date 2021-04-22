@@ -1,15 +1,28 @@
 package clientinterface;
 
-import java.awt.*;
-import javax.swing.*;
-import kioskapp.itemproduct.ItemProduct;
-import java.sql.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class KitchenInterface {
-	
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+
+import kioskapp.itemproduct.ItemProduct;
+
+public class TransactionDetail {
+
 	public String Data;
 	public int order;
     private DefaultListModel<String> list1;    
@@ -30,8 +43,8 @@ public class KitchenInterface {
 	Connection connection;
 	Statement statement;
 	ResultSet resultset;
-	
-	public KitchenInterface() {
+		
+	public TransactionDetail() {
 		driver = "com.mysql.cj.jdbc.Driver";
 		connectionURL ="jdbc:mysql://localhost:3306/";
 		dbName = "kioskappdb_dev";
@@ -45,16 +58,13 @@ public class KitchenInterface {
 		list.setBounds(100,100,75,75);
 	}
 	
-	private void KitchenGUI() {
+	public void TransactionDetailUI() {
 		//create a new frame
-		frame = new JFrame("Kitchen Frame");
-		
-		//create a object
-		KitchenInterface s=new KitchenInterface();
-		
+		frame = new JFrame("Transaction Detail");
+				
 		label1 = new JLabel();
 		label2 = new JLabel("Order Number:");
-		label3 = new JLabel("Kitchen Order Screen");
+		label3 = new JLabel("Transaction Receipt  ");
 		label1.setFont(new Font("Serif", Font.BOLD, 20));
 		label3.setFont(new Font("Serif", Font.BOLD, 20));
 		label2.setFont(new Font("Serif", Font.BOLD, 20));
@@ -83,8 +93,7 @@ public class KitchenInterface {
 	}
 	
 	public DefaultListModel retrieve() {
-		
-		KitchenGUI();		
+			
 		DefaultListModel dm = new DefaultListModel();
 		
 		String sql = "select OrderedItemId, i.Name 'Itemproduct', Quantity , o.OrderReferenceNumber 'orders', o.TotalAmount from orders o, ordereditem t, itemproduct i where t.Orders = o.OrderId and t.ItemProduct = i.ItemProduct";
@@ -96,32 +105,21 @@ public class KitchenInterface {
 			
 			order = 0;
 			int i = 0;
-			
-			//receipt generation
-			OutputStreamReciept osr = new OutputStreamReciept();
-			ArrayList<String> recieptMenu =new ArrayList<String>();			
-			int OrderIdReceipt = 0;
 			float totalOrder = 0;
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd");  
-	    	LocalDateTime now = LocalDateTime.now();
-	    	//receipt generation
-	    	
+			list1.addElement("Order Summary: ");
 			while (resultset.next())
 			{
 			  i++;
-			  OrderIdReceipt = resultset.getInt("OrderedItemId");
-			  int id = i;
+			  order = resultset.getInt("OrderedItemId");
 			  String item  = resultset.getString("ItemProduct");
 			  int quantity = resultset.getInt("Quantity");
 			  totalOrder = resultset.getFloat("TotalAmount");
 			  order = resultset.getInt("Orders");
               itemprod.setName(item);
               
-              recieptMenu.add(item);
-              list1.addElement(String.valueOf(id) +"  "+ " ITEM: " + itemprod.getName()+" "+ "QUANTITY: " + String.valueOf(quantity));
+              list1.addElement(String.valueOf(i) + "  " + " ITEM: " + item + " " + "QUANTITY: " + String.valueOf(quantity));
 			}
-			
-			osr.generateReceipt(OrderIdReceipt, dtf.format(now), recieptMenu, totalOrder);
+			list1.addElement("Total Amount (RM): " + String.valueOf(totalOrder));
 			
 			label1.setText(String.valueOf(order));
 			return dm;
